@@ -1,0 +1,533 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage[unicode=true] {hyperref}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Wavelet filter
+\end_layout
+
+\begin_layout Standard
+The wavelet transform is commonly used in modern signal-processing applications.
+ This type of wavelet filter applies the 
+\emph on
+à trous
+\emph default
+ algorithm 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Starck2002,Izeddin2012"
+
+\end_inset
+
+ which is an undecimated scheme in which the filter responses are up-sampled,
+ thereby inserting holes (
+\emph on
+trous
+\emph default
+ in French) between the filter coefficients.
+ The output of each filter level, therefore, contains the same number of
+ samples as the input.
+\end_layout
+
+\begin_layout Standard
+The wavelet transform of the input data at level 
+\begin_inset Formula $j=1,\ldots,N$
+\end_inset
+
+ is computed as
+\begin_inset Formula 
+\begin{equation}
+F_{j}=V_{j-1}-V_{j}\,,\label{eq:filter_wavelet}
+\end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\begin{equation}
+V_{j}=\left(V_{j-1}*\boldsymbol{k}_{j}\right)*\boldsymbol{k}_{j}^{\top}\,.\label{eq:wavelet-approx}
+\end{equation}
+
+\end_inset
+
+Here 
+\begin_inset Formula $V_{0}=I$
+\end_inset
+
+ is the input image, 
+\begin_inset Formula $\boldsymbol{k}_{j}$
+\end_inset
+
+ is a filter kernel (see 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{Convolution.html}{convolution with separable kernels}
+\end_layout
+
+\end_inset
+
+) at the corresponding level, and 
+\begin_inset Formula $l$
+\end_inset
+
+ is the kernel size.
+ The number of levels is given by 
+\begin_inset Formula $N$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The expression in Equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:filter_wavelet"
+
+\end_inset
+
+ acts as a band-pass filter.
+ Each wavelet level thus corresponds to a different range of spatial frequencies.
+ The first level 
+\begin_inset Formula $F_{1}$
+\end_inset
+
+ contains mainly the high spatial frequencies present in the input image
+ including noise.
+ Higher levels contain ranges of lower and lower image frequency components.
+ In our case, the output of the wavelet filter is the second wavelet level
+ 
+\begin_inset Formula $F_{2}$
+\end_inset
+
+.
+ The standard deviation of values obtained in the first wavelet level 
+\begin_inset Formula $F_{1}$
+\end_inset
+
+ can be used as a molecular detection 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{../../detectors/Threshold.html}{threshold}
+\end_layout
+
+\end_inset
+
+ in the filtered image 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Izeddin2012"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The wavelet filter typically uses a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{Convolution.html}{convolution kernel}
+\end_layout
+
+\end_inset
+
+ based on normalized B-spline basis functions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Starck2002,Izeddin2012"
+
+\end_inset
+
+.
+ In our case, the B-spline basis function of order 
+\begin_inset Formula $q\in\mathbb{N}^{+}$
+\end_inset
+
+ in the variable 
+\begin_inset Formula $t\in\mathbb{R}$
+\end_inset
+
+, written as 
+\begin_inset Formula $B_{q}\left(t\right)$
+\end_inset
+
+, is defined recursively as follows.
+ For 
+\begin_inset Formula $q=1$
+\end_inset
+
+, 
+\begin_inset Formula 
+\[
+B_{1}\left(t\right)=\begin{cases}
+1 & \quad\mathrm{if}\;0\leq t<1\,,\\
+0 & \quad\mathrm{otherwise}\,,
+\end{cases}
+\]
+
+\end_inset
+
+and for 
+\begin_inset Formula $q>1$
+\end_inset
+
+,
+\begin_inset Formula 
+\[
+B_{q}\left(t\right)=\frac{t}{q-1}B_{q-1}\left(t\right)+\frac{q-t}{q-1}B_{q-1}\left(t-1\right).
+\]
+
+\end_inset
+
+Here 
+\begin_inset Formula $B_{q}\left(t\right)$
+\end_inset
+
+ has non-zero values only in the interval 
+\begin_inset Formula $0\leq t<q$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The first wavelet level 
+\begin_inset Formula $F_{1}$
+\end_inset
+
+ is computed using the convolution kernel 
+\begin_inset Formula $\boldsymbol{k}_{1}=\left[k_{1,1},\ldots,k_{1,l}\right]$
+\end_inset
+
+, where 
+\begin_inset Formula $k_{1,i}\left(x\mid q,s\right)=aB_{q}\left(\frac{x}{s}+\frac{q}{2}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $i=1,\ldots,l$
+\end_inset
+
+, 
+\begin_inset Formula $x=i-\left(l+1\right)/2$
+\end_inset
+
+, and 
+\begin_inset Formula $l=2\left\lceil \frac{qs}{2}\right\rceil -1$
+\end_inset
+
+.
+ Here 
+\begin_inset Formula $s>0$
+\end_inset
+
+ defines a scaling factor of the variable 
+\begin_inset Formula $x$
+\end_inset
+
+, and 
+\begin_inset Formula $a$
+\end_inset
+
+ is a scaling factor such that 
+\begin_inset Formula $\sum_{i}k_{1,i}=1$
+\end_inset
+
+.
+ Kernels for higher wavelet levels are obtained by inserting zeros between
+ the kernel coefficients.
+ Users need to input the order 
+\begin_inset Formula $q$
+\end_inset
+
+ of the B-spline basis function and the scaling factor 
+\begin_inset Formula $s$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In our implementation, the default kernel uses a B-spline basis function
+ of the third order with a scaling factor 
+\begin_inset Formula $s=2$
+\end_inset
+
+.
+ These settings yield kernels 
+\begin_inset Formula $\boldsymbol{k}_{1}=\left[\frac{1}{16},\frac{1}{4},\frac{3}{8},\frac{1}{4},\frac{1}{16}\right]^{\top}$
+\end_inset
+
+ and 
+\begin_inset Formula $\boldsymbol{k}_{2}=\left[\frac{1}{16},0,\frac{1}{4},0,\frac{3}{8},0,\frac{1}{4},0,\frac{1}{16}\right]^{\top}$
+\end_inset
+
+, as suggested in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Starck2002,Izeddin2012"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Threshold for approximate localization of molecules
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{../../detectors/Threshold.html}{threshold}
+\end_layout
+
+\end_inset
+
+ value can be specified by users as an expression combining mathematical
+ functions and operators with variables based on the current raw or filtered
+ image.
+ Variables provided by this filter are:
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Wave.I
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+current raw input image
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Wave.F
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+corresponding filtered image
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Wave.F1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+first wavelet level 
+\begin_inset Formula $F_{1}$
+\end_inset
+
+ of the current input image
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+Wave.F2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+second wavelet level 
+\begin_inset Formula $F_{2}$
+\end_inset
+
+ of the current input image
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+See also
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{Filters.html}{Image filtering and feature enhancement}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{../../detectors/Detectors.html}{Finding approximate positions of molecules}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

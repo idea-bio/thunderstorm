@@ -1,0 +1,564 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage[unicode=true] {hyperref}
+\usepackage{optim}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Fitting point-spread function models
+\end_layout
+
+\begin_layout Subsection*
+Least-squares methods
+\end_layout
+
+\begin_layout Standard
+To approximate the data with a point-spread function, least-squares methods
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kendall1979,Bevington2003,Mortensen-NM-2010"
+
+\end_inset
+
+ are employed to minimize the sum of (weighted) squared residuals defined
+ by
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula 
+\begin{equation}
+\chi^{2}\left(\boldsymbol{\theta}\mid\mathcal{D}\right)=\sum_{x,y\in\mathcal{D}}{w\left(\tilde{I}\left(x,y\right)-\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)\right)^{2}}\,.\label{eq:chi2}
+\end{equation}
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Here the residual value for the 
+\begin_inset Formula $\left(x,y\right)$
+\end_inset
+
+ data point is defined as the difference between the observed image intensity
+ 
+\begin_inset Formula $\tilde{I}\left(x,y\right)$
+\end_inset
+
+ and the value approximated by the 
+\begin_inset Formula $\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)$
+\end_inset
+
+, where 
+\begin_inset Formula $\boldsymbol{\theta}$
+\end_inset
+
+ are the PSF parameters.
+ The residual value can be further weighted by 
+\begin_inset Formula $w=1$
+\end_inset
+
+, making all measurements equally significant, or 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+weighted by 
+\begin_inset Formula $w=1/\tilde{I}\left(x,y\right)$
+\end_inset
+
+, which takes into account the uncertainty in the number of
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ detected photons.
+\end_layout
+
+\begin_layout Standard
+The search for parameters 
+\begin_inset Formula $\boldsymbol{\hat{\theta}}$
+\end_inset
+
+ which minimize 
+\begin_inset Formula $\chi^{2}\left(\boldsymbol{\theta}\mid\mathcal{D}\right)$
+\end_inset
+
+, leads to an optimization problem formulated as
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{\hat{\theta}}=\argmin_{\boldsymbol{\theta}}\chi^{2}\left(\boldsymbol{\theta}\mid\mathcal{D}\right)\,,\label{eq:lsq}
+\end{equation}
+
+\end_inset
+
+which we solve by the Levenberg\SpecialChar \nobreakdash-
+Marquardt algorithm as implemented in the
+ Apache Commons Math library 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MathApache"
+
+\end_inset
+
+.
+ The starting point for the optimization process is computed from the data
+ as the difference between the maximum and the minimum intensity values
+ for the molecular intensity 
+\begin_inset Formula $\theta_{N}$
+\end_inset
+
+, and as the minimum intensity value for the background offset 
+\begin_inset Formula $\theta_{b}$
+\end_inset
+
+.
+ Users have to choose the starting point for the approximate molecular width
+ 
+\begin_inset Formula $\theta_{\sigma}$
+\end_inset
+
+.
+ The sub-pixel refinement of the coordinates is obtained as 
+\begin_inset Formula $\hat{x}_{0}=\hat{\theta}_{x}$
+\end_inset
+
+ and 
+\begin_inset Formula $\hat{y}_{0}=\hat{\theta}_{y}$
+\end_inset
+
+, where 
+\begin_inset Formula $\boldsymbol{\hat{\theta}}=\left[\hat{\theta}_{x},\hat{\theta}_{y},\ldots\right]$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Maximum-likelihood estimation
+\end_layout
+
+\begin_layout Standard
+This approach assumes that the number of photons collected by a single camera
+ pixel follows the Poisson distribution.
+ Thus, the probability of 
+\begin_inset Formula $\kappa$
+\end_inset
+
+ photons arriving at a camera pixel, where the expected number of photons
+ is 
+\begin_inset Formula $\lambda$
+\end_inset
+
+, is given by
+\begin_inset Formula 
+\begin{equation}
+p\left(\kappa\mid\lambda\right)=\frac{\lambda^{\kappa}\mathrm{e}^{-\lambda}}{\kappa!}\,.\label{eq:poisson}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Suppose that samples are drawn independently from the Poisson distribution,
+ with the expected photon count 
+\begin_inset Formula $\lambda=\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)$
+\end_inset
+
+ given by the point-spread function model, and the observed photon count
+ 
+\begin_inset Formula $\kappa=\tilde{I}\left(x,y\right)$
+\end_inset
+
+ given by the image intensity expressed in photons.
+ The likelihood 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kendall1979,Mortensen-NM-2010,Smith2010,Huang2011"
+
+\end_inset
+
+ of the parameters 
+\begin_inset Formula $\boldsymbol{\theta}$
+\end_inset
+
+ can be modeled as
+\begin_inset Formula 
+\begin{equation}
+L(\boldsymbol{\theta}\mid\mathcal{D})=\prod_{x,y\in\mathcal{D}}\frac{\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)^{\tilde{I}\left(x,y\right)}\mathrm{e}^{-\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)}}{\tilde{I}\left(x,y\right)!}\,.
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The maximum likelihood estimate of the parameters 
+\begin_inset Formula $\boldsymbol{\theta}$
+\end_inset
+
+ is, by definition, the value that maximizes the likelihood 
+\begin_inset Formula $L(\boldsymbol{\theta}\mid\mathcal{D})$
+\end_inset
+
+.
+ Intuitively, the estimate 
+\begin_inset Formula $\boldsymbol{\hat{\theta}}$
+\end_inset
+
+ corresponds to the value 
+\begin_inset Formula $\boldsymbol{\theta}$
+\end_inset
+
+ that best agrees with the data.
+ The maximization problem has the form
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{\hat{\theta}}=\argmax_{\boldsymbol{\theta}}\sum_{x,y\in\mathcal{D}}{\left[\tilde{I}\left(x,y\right)\ln{\left(\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)\right)}-\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)\right]}\,,\label{eq:loglik}
+\end{equation}
+
+\end_inset
+
+which we solve by the Nelder-Mead method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "NelderMead"
+
+\end_inset
+
+.
+ The starting point for the optimization process is computed from the data
+ as the difference between the maximum and the minimum intensity values
+ for the molecular intensity 
+\begin_inset Formula $\theta_{N}$
+\end_inset
+
+, and as the minimum intensity value for the background offset 
+\begin_inset Formula $\theta_{b}$
+\end_inset
+
+.
+ Users have to choose the starting point for the approximate molecular width
+ 
+\begin_inset Formula $\theta_{\sigma}$
+\end_inset
+
+.
+ The sub-pixel refinement of the coordinates is obtained as 
+\begin_inset Formula $\hat{x}_{0}=\hat{\theta}_{x}$
+\end_inset
+
+ and 
+\begin_inset Formula $\hat{y}_{0}=\hat{\theta}_{y}$
+\end_inset
+
+, where 
+\begin_inset Formula $\boldsymbol{\hat{\theta}}=\left[\hat{\theta}_{x},\hat{\theta}_{y},\ldots\right]$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Constraining parameters of PSF models
+\end_layout
+
+\begin_layout Standard
+The Levenberg-Marquardt algorithm and the Nelder-Mead method used above
+ search for values of the parameters 
+\begin_inset Formula $\boldsymbol{\theta}$
+\end_inset
+
+ over an infinite interval.
+ The optimization process can therefore converge to a solution with negative
+ values which is impossible for variables corresponding to image intensity
+ or to the standard deviation of a Gaussian PSF.
+ We therefore limit the interval of possible values by transforming the
+ relevant parameters and using 
+\begin_inset Formula $\mathrm{PSF}\left(x,y\mid\boldsymbol{\tilde{\theta}}\right)$
+\end_inset
+
+ in Equations 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:lsq"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:loglik"
+
+\end_inset
+
+ instead of 
+\begin_inset Formula $\mathrm{PSF}\left(x,y\mid\boldsymbol{\theta}\right)$
+\end_inset
+
+.
+ The transformation for a 2D Gaussian PSF model is 
+\begin_inset Formula $\boldsymbol{\tilde{\theta}}=\left[\theta_{x},\theta_{y},\theta_{\sigma}^{2},\theta_{N}^{2},\theta_{b}^{2}\right]$
+\end_inset
+
+.
+ The optimization process is still unconstrained but will result in positive
+ PSF parameters.
+ Such a
+\begin_inset space ~
+\end_inset
+
+transformation also improves the stability of the fit.
+\end_layout
+
+\begin_layout Subsection*
+Guidelines for the choice of parameters
+\end_layout
+
+\begin_layout Standard
+Fitting PSF models by maximum likelihood estimation generally gives slightly
+ better results than fitting by least square methods, particularly when
+ the photon counts are low.
+ Maximum likelihood estimation requires correct setup of the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{../../CameraSetupPlugIn.html}{camera parameters}
+\end_layout
+
+\end_inset
+
+ (photoelectrons per A/D count and the digitizer offset level).
+ The recommended PSF model, which generally works well, is the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{IntSymmetricGaussianEstimatorUI.html}{integrated Gaussian}
+\end_layout
+
+\end_inset
+
+.
+ The initial size of sigma can be found by running ThunderSTORM on few images
+ of the data sequence.
+ A histogram of the fitted sizes of sigma (in pixels) can help to find the
+ initial value.
+ The size of the fitting radius should be an integer number close to 3*sigma.
+\end_layout
+
+\begin_layout Subsection*
+See also
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{Estimators.html}{Sub-pixel 2D localization of molecules}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{PSF.html}{Point-spread function (PSF)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{FittingRegion.html}{Definition of the fitting region}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{LocalizationUncertainty.html}{Localization uncertainty}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{CrowdedField.html}{Multiple-emitter fitting analysis}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{../../CameraSetupPlugIn.html}{Camera setup}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,236 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage[unicode=true] {hyperref}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Point-spread function (PSF)
+\end_layout
+
+\begin_layout Standard
+The impulse response of a microscope to a point-like source is described
+ by the point-spread function (PSF).
+ Because a single molecule emitter can be treated as an incoherent point
+ source in SMLM data, the result of fitting a PSF model to an image of a
+ single molecule is an estimate of the molecular position, its imaged size,
+ and its intensity.
+ ThunderSTORM offers a choice between several PSF models and fitting procedures
+ based on (weighted or unweighted) least-squares methods and maximum likelihood
+ estimation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kendall1979,Mortensen-NM-2010"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+It has been shown 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Thompson2002,Rieger2010"
+
+\end_inset
+
+ that the Gaussian function provides a very good approximation of the real
+ PSF of a microscope.
+ This is mainly due to pixelation effects and the presence of noise, which
+ makes the difference between the Gaussian function and the real PSF negligible.
+ The advantage of Gaussian PSF models are their simplicity, robustness,
+ and computational efficiency.
+\end_layout
+
+\begin_layout Subsection*
+See also
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{SymmetricGaussianEstimatorUI.html}{Symmetric 2D Gaussian function PSF
+ model}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{IntSymmetricGaussianEstimatorUI.html}{Integrated form of a symmetric
+ 2D Gaussian function PSF model}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{EllipticGaussianEstimatorUI.html}{Rotated elliptical Gaussian function
+ PSF model (3D using astigmatism)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{Fitting.html}{Fitting point-spread function models}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{FittingRegion.html}{Definition of the fitting region}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{LocalizationUncertainty.html}{Localization uncertainty}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{CrowdedField.html}{Multiple-emitter fitting analysis}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

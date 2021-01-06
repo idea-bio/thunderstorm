@@ -1,0 +1,55 @@
+/* add missing style for bibliography title, same as subsection */
+.ltx_title_bibliography {
+    font-size:120%; font-weight:bold; margin-top:1.5em; margin-bottom:1em;
+}
+/* hide footer */
+.ltx_page_footer {
+    display : none;
+}
+/* hide backlinks in bibliography */
+.ltx_bib_cited{
+    display : none;
+}
+/* remove body padding */
+.ltx_page_main {
+    padding:0em 0em 0em 0em; 
+}
+/* workaround for a css bug in swingbox: vertical misalignement in equations */
+.ltx_td{
+    vertical-align: middle;
+}
+/*workaround for a bug in latexml: tables cells are sometimes wrongly labeled as a header*/
+th{
+    font-weight:normal;
+}
+/*remove indentation of paragraph after equation and code listing*/
+div > .ltx_equation + .ltx_p {
+    text-indent: 0em;
+}
+div > .ltx_equationgroup + .ltx_p {
+    text-indent: 0em;
+}
+div > .ltx_listingblock + .ltx_p {
+    text-indent: 0em;
+}
+/*remove default margin for paragraphs*/
+.ltx_p{
+    margin: 1em 0em;
+    /* make line spacing smaller, for some odd reason Swingbox has it bigger than it should be */
+    line-height: 0.9;
+}
+/*margins around equations*/
+.ltx_equation, .ltx_equationgroup {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+/*margins around tabular*/
+.ltx_tabular {
+	margin-left: 1em;
+	margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+/*remove paragraphs indentation*/
+div > .ltx_para > .ltx_p,
+section > .ltx_para > .ltx_p { text-indent:0em; }

@@ -1,0 +1,326 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage[unicode=true] {hyperref}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Generator of simulated data
+\end_layout
+
+\begin_layout Standard
+ThunderSTORM is capable of generating a sequence of SMLM-like images in
+ which the ground-truth positions of the molecules are known.
+ This allows users to perform Monte Carlo simulations 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Walter2010,Krizek2011"
+
+\end_inset
+
+ and to quantitatively evaluate the performance of applied localization
+ algorithms by calculating, e.g., the Jaccard index or 
+\begin_inset Formula $F_{1}$
+\end_inset
+
+ score using the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{PerformanceEvaluationPlugIn.html}{Performance evaluation plugin}
+\end_layout
+
+\end_inset
+
+.
+ In addition to the image size and sequence length, users can specify the
+ intensity, imaged size, and spatial density of the generated molecules.
+ The resulting images can be subjected to sample drift.
+ Noise in the generated images simulates the behavior of CCD or EMCCD cameras.
+\end_layout
+
+\begin_layout Subsection*
+Image formation
+\end_layout
+
+\begin_layout Standard
+For each frame, we first create an ideal, noise free, SMLM-like image to
+ simulate the expected number of photons detected in each camera pixel.
+ Image formation starts by creating a list of molecules with FWHM and intensity
+ chosen randomly in user-specified ranges, and with random positions of
+ molecules given by a user-specified spatial density (see below).
+ Users can also specify any of the implemented PSF models, including 3D
+ models, to create the simulated images of molecules.
+ The generated molecules are added sequentially to the final image similarly
+ as in the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{rendering/ui/DensityRenderingUI.html}{Gaussian rendering}
+\end_layout
+
+\end_inset
+
+ method.
+ A user-specified offset is added to the generated image sequence to simulate
+ photon background.
+ Alternatively, a gray-scale image, in which each pixel value is normalized
+ to the interval 
+\begin_inset Formula $\left[0,1\right]$
+\end_inset
+
+, can be used as a weighting factor of the offset level in different parts
+ of the generated images to simulate an irregular background as might be
+ encountered in real samples.
+\end_layout
+
+\begin_layout Standard
+In order to simulate the photon counting process in the generated images,
+ each pixel value expressed in photons is modified by a Poisson-distributed
+ random number.
+ The data generator can optionally simulate EM gain of EMCCD cameras.
+ In this case we use a stochastic model described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hirsch2013"
+
+\end_inset
+
+, where the electron multiplication is modeled by the Gamma distribution
+ 
+\begin_inset Formula $\Gamma(k,g)$
+\end_inset
+
+.
+ The shape 
+\begin_inset Formula $k$
+\end_inset
+
+ is given by the number of photons detected in the simulated CCD register
+ and the scale 
+\begin_inset Formula $g$
+\end_inset
+
+ is given by the user-specified value of gain.
+\end_layout
+
+\begin_layout Standard
+Finally, the signal in the camera register is digitized by converting the
+ photons to digital counts.
+ The CCD sensitivity (in photons per A/D count), and the camera digitizer
+ offset (in A/D counts) are user-specified in the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{CameraSetupPlugIn.html}{camera setup}
+\end_layout
+
+\end_inset
+
+, as well as the camera pixel size (in nanometers) as projected to the sample
+ plane.
+\end_layout
+
+\begin_layout Subsection*
+Fixed or spatially varying density of molecules
+\end_layout
+
+\begin_layout Standard
+Users can specify a fixed or spatially varying density of simulated molecules
+ in the generated images.
+ The variability is achieved by a user-supplied gray-scale mask 
+\begin_inset Formula $M$
+\end_inset
+
+, in which each pixel value is normalized to the interval 
+\begin_inset Formula $\left[0,1\right]$
+\end_inset
+
+ and used to represent the weighting factor.
+ The average number of molecules at a given integer pixel position 
+\begin_inset Formula $\left(x,y\right)$
+\end_inset
+
+ is then computed as
+\begin_inset Formula 
+\[
+\overline{d}\left(x,y\right)=a^{2}M\left(x,y\right)d_{\mathrm{max}}\,,
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $a$
+\end_inset
+
+ is the camera pixel size as projected to the sample plane, and 
+\begin_inset Formula $d_{\mathrm{max}}$
+\end_inset
+
+ is the maximum spatial density of molecules per unit area as specified
+ by users.
+\end_layout
+
+\begin_layout Standard
+The procedure for generating molecular positions follows the spatial Poisson
+ point process 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kendall1979"
+
+\end_inset
+
+.
+ Thus for each value 
+\begin_inset Formula $\overline{d}\left(x,y\right)$
+\end_inset
+
+, a random number of events (molecules) is created in the pixel 
+\begin_inset Formula $\left(x,y\right)$
+\end_inset
+
+ using a Poisson random number generator.
+ Molecular centers are placed uniformly and randomly within that pixel.
+\end_layout
+
+\begin_layout Standard
+Note that the mask 
+\begin_inset Formula $M$
+\end_inset
+
+ should be at least the same size as the desired super-resolution image
+ in order to preserve high resolution in the final reconstruction.
+ The coordinates of the molecular centers are down-scaled appropriately.
+\end_layout
+
+\begin_layout Subsection*
+Additional sample drift
+\end_layout
+
+\begin_layout Standard
+The generated molecular positions in the image sequence can be subjected
+ to a lateral sample drift.
+ Users need to specify the speed and direction of the drift, which is constant
+ throughout the image sequence.
+\end_layout
+
+\begin_layout Subsection*
+See also
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{CameraSetupPlugIn.html}{Camera setup}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+href{PerformanceEvaluationPlugIn.html}{Performance evaluation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
