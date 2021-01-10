@@ -50,11 +50,21 @@ public class GenericTableWindow {
     protected ColoredTable table;
     protected final TripleStateTableModel model;
     protected JScrollPane tableScrollPane;
+    public String frameTitle;
+    public Boolean isHeadless;
+    public Boolean isHeadlessVisible;
+
 
     public GenericTableWindow(String frameTitle) {
-        frame = new JFrame(frameTitle);
-        frame.setIconImage(IJ.getInstance().getIconImage());
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        this.frameTitle = frameTitle;
+        isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
+        System.out.println("is headless: " +  isHeadless);
+        if (!isHeadless){
+            frame = new JFrame(frameTitle);
+            frame.setIconImage(IJ.getInstance().getIconImage());
+            frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        }
+
         //
         model = new TripleStateTableModel();
         table = new ColoredTable(model);
@@ -67,49 +77,54 @@ public class GenericTableWindow {
                 tableHeaderMouseClicked(e);
             }
         });
-        table.setDropTarget(new TableDropTarget());
-        tableScrollPane = new JScrollPane(table);
-        tableScrollPane.setDropTarget(new TableDropTarget());
-        table.addMouseMotionListener(new MouseMotionListener() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                tableMouseDragged(e);
-            }
+        if(!isHeadless){
 
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                tableMouseMoved(e);
-            }
-        });
-        table.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                tableMouseClicked(e);
-            }
+            table.setDropTarget(new TableDropTarget());
+            tableScrollPane = new JScrollPane(table);
+            tableScrollPane.setDropTarget(new TableDropTarget());
+            table.addMouseMotionListener(new MouseMotionListener() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    tableMouseDragged(e);
+                }
 
-            @Override
-            public void mousePressed(MouseEvent e) {
-                tableMousePressed(e);
-            }
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    tableMouseMoved(e);
+                }
+            });
+            table.addMouseListener(new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    tableMouseClicked(e);
+                }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                tableMouseReleased(e);
-            }
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    tableMousePressed(e);
+                }
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                tableMouseEntered(e);
-            }
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    tableMouseReleased(e);
+                }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                tableMouseExited(e);
-            }
-        });
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    tableMouseEntered(e);
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    tableMouseExited(e);
+                }
+            });
+        }
     }
 
     protected void packFrame() {
+        if (isHeadless)
+            return;
         Container contentPane = frame.getContentPane();
         contentPane.add(tableScrollPane);
         frame.setContentPane(contentPane);
@@ -125,11 +140,22 @@ public class GenericTableWindow {
     }
 
     public void show(String title) {
+        if (isHeadless)
+        {
+            isHeadlessVisible = true;
+            return;
+        }
         frame.setTitle(title);
         show();
     }
 
     public void show() {
+        if (isHeadless)
+        {
+            isHeadlessVisible = true;
+            return;
+        }
+
         WindowManager.addWindow(frame); // ImageJ's own Window Manager
         GUI.runOnUIThreadAndWait(new Runnable() {
             @Override
@@ -141,11 +167,17 @@ public class GenericTableWindow {
     }
 
     public void hide() {
+        if (isHeadless){
+            isHeadlessVisible = false;
+            return;
+        }
         frame.setVisible(false);
         WindowManager.removeWindow(frame); // ImageJ's own Window Manager
     }
 
     public boolean isVisible() {
+        if (isHeadless)
+            return isHeadlessVisible;
         return frame.isVisible();
     }
 

@@ -65,6 +65,9 @@ public class ResultsTableWindow extends GenericTableWindow {
 
     @Override
     protected void packFrame() {
+        if(isHeadless)
+            return;
+
         frame.setPreferredSize(new Dimension(600, 750));
         //
         status = new JLabel(" ");
@@ -217,6 +220,9 @@ public class ResultsTableWindow extends GenericTableWindow {
     }
 
     public void setPreviewRenderer(RenderingQueue renderer) {
+        Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
+        if (isHeadless)
+            return;
         previewRenderer = renderer;
         livePreview = (renderer != null);
         preview.setSelected(livePreview);

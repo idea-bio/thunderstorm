@@ -287,12 +287,14 @@ public final class AnalysisPlugIn implements ExtendedPlugInFilter {
     }
 
     synchronized public void showResults() {
+        Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
         //
         // Show table with results
         IJResultsTable rt = IJResultsTable.getResultsTable();
         rt.sortTableByFrame();
         rt.insertIdColumn();
-        rt.copyOriginalToActual();
+        if(!isHeadless)
+            rt.copyOriginalToActual();
         rt.setActualState();
         rt.convertAllColumnsToAnalogUnits();
         rt.setPreviewRenderer(renderingQueue);

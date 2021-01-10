@@ -22,13 +22,16 @@ class GroundTruthTableWindow extends GenericTableWindow implements ActionListene
     private JButton showHist;
     private JButton rendering;
     private JButton evaluation;
-    
+
     public GroundTruthTableWindow(String frameTitle) {
         super(frameTitle);
     }
-    
+
     @Override
     protected void packFrame() {
+        if (!isHeadless)
+            return;
+
         frame.setPreferredSize(new Dimension(550, 600));
         //
         JPanel buttons = new JPanel();

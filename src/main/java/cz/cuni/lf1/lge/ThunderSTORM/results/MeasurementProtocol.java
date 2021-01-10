@@ -69,10 +69,17 @@ public class MeasurementProtocol {
             writer.newLine();
             writer.write(fixNewLines(gson.toJson(estimator)));
             writer.newLine();
-            writer.write("Post-processing:");
-            writer.newLine();
-            writer.write(fixNewLines(gson.toJson(IJResultsTable.getResultsTable().getOperationHistoryPanel().getHistory(), new TypeToken<List<Operation>>(){}.getType())));
-            writer.newLine();
+
+            Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
+            if (!isHeadless){
+                writer.write("Post-processing:");
+                writer.newLine();
+                writer.write(fixNewLines(gson.toJson(IJResultsTable.getResultsTable().getOperationHistoryPanel().getHistory(), new TypeToken<List<Operation>>(){}.getType())));
+                writer.newLine();
+            }else{
+                System.out.println("warning: headless mode skip print Post-processing");
+            }
+
         } catch(IOException ex) {
             IJ.handleException(ex);
         } finally {

@@ -30,7 +30,8 @@ public class IJResultsTable extends GenericTable<ResultsTableWindow> {
 
     public synchronized static IJResultsTable getResultsTable() {
         if(resultsTable == null) {
-            if(SwingUtilities.isEventDispatchThread()) {
+            Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
+            if(SwingUtilities.isEventDispatchThread() || isHeadless) {
                 setResultsTable(new IJResultsTable());
             } else {
                 try {

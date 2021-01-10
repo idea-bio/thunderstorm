@@ -95,7 +95,8 @@ public class ImportExportPlugIn implements PlugIn {
             dialog.getParams().readMacroOptions();
             dialog.getFileParams().readMacroOptions();
         } else {
-            if(dialog.showAndGetResult() != JOptionPane.OK_OPTION) {
+            Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
+            if(dialog.showAndGetResult() != JOptionPane.OK_OPTION && !isHeadless) {
                 return;
             }
         }
@@ -128,19 +129,14 @@ public class ImportExportPlugIn implements PlugIn {
     private void runExport(GenericTable table, boolean groundTruth) {
         String[] colNames = (String[]) table.getColumnNames().toArray(new String[0]);
 
-        ExportDialog dialog = new ExportDialog(IJ.getInstance(), groundTruth, colNames);
-        if(MacroParser.isRanFromMacro()) {
-            dialog.getParams().readMacroOptions();
-            dialog.getFileParams().readMacroOptions();
-        } else {
-            if(dialog.showAndGetResult() != JOptionPane.OK_OPTION) {
-                return;
-            }
-        }
+        Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
 
-        // eliminate the need to list all columns when running from macro
-        // - if nothing is mentioned, assume user wants to export everything
-        if (MacroParser.isRanFromMacro()) {
+        if (isHeadless){
+            ExportDialogHeadless dialog = new ExportDialogHeadless(IJ.getInstance(), groundTruth, colNames);
+            if(MacroParser.isRanFromMacro()) {
+                dialog.getParams().readMacroOptions();
+                dialog.getFileParams().readMacroOptions();
+            }
             boolean all = true;
             for (int i = 0; i < dialog.exportColumns.length; i++) {
                 if (dialog.exportColumns[i].getValue()) {
@@ -148,31 +144,87 @@ public class ImportExportPlugIn implements PlugIn {
                     break;
                 }
             }
+
             if (all) {
                 for (int i = 0; i < dialog.exportColumns.length; i++) {
                     dialog.exportColumns[i].setValue(true);
                 }
             }
-        }
+            // eliminate the need to list all columns when running from macro
+            // - if nothing is mentioned, assume user wants to export everything
 
-        List<String> columns = new ArrayList<String>();
-        for(int i = 0; i < colNames.length; i++) {
-            if(dialog.exportColumns[i].getValue()) {
-                columns.add(colNames[i]);
+            List<String> columns = new ArrayList<String>();
+            for(int i = 0; i < colNames.length; i++) {
+                if(dialog.exportColumns[i].getValue()) {
+                    columns.add(colNames[i]);
+                }
+                else{
+                    System.out.println(colNames[i] +" not exported");
+                }
             }
-        }
-        path = dialog.getFilePath();
-        //save protocol
-        if(!groundTruth && dialog.saveProtocol.getValue()) {
-            IJResultsTable ijrt = (IJResultsTable) table;
-            if(ijrt.getMeasurementProtocol() != null) {
-                ijrt.getMeasurementProtocol().export(getProtocolFilePath(path));
+            path = dialog.getFilePath();
+            //save protocol
+            if(!groundTruth && dialog.saveProtocol.getValue()) {
+                IJResultsTable ijrt = (IJResultsTable) table;
+                if(ijrt.getMeasurementProtocol() != null) {
+                    ijrt.getMeasurementProtocol().export(getProtocolFilePath(path));
+                }
             }
-        }
 
-        //export
-        IImportExport exporter = getModuleByName(dialog.getFileFormat());
-        callExporter(exporter, table, path, columns);
+            //export
+            IImportExport exporter = getModuleByName(dialog.getFileFormat());
+            callExporter(exporter, table, path, columns);
+        } else{
+            ExportDialog dialog = new ExportDialog(IJ.getInstance(), groundTruth, colNames);
+            if(MacroParser.isRanFromMacro()) {
+                dialog.getParams().readMacroOptions();
+                dialog.getFileParams().readMacroOptions();
+            } else {
+                if(dialog.showAndGetResult() != JOptionPane.OK_OPTION) {
+                    return;
+                }
+            }
+
+            // eliminate the need to list all columns when running from macro
+            // - if nothing is mentioned, assume user wants to export everything
+            if (MacroParser.isRanFromMacro()) {
+                boolean all = true;
+                for (int i = 0; i < dialog.exportColumns.length; i++) {
+                    if (dialog.exportColumns[i].getValue()) {
+                        all = false;
+                        break;
+                    }
+                }
+
+                if (all) {
+                    for (int i = 0; i < dialog.exportColumns.length; i++) {
+                        dialog.exportColumns[i].setValue(true);
+                    }
+                }
+            }
+
+            List<String> columns = new ArrayList<String>();
+            for(int i = 0; i < colNames.length; i++) {
+                if(dialog.exportColumns[i].getValue()) {
+                    columns.add(colNames[i]);
+                }
+                else{
+                    System.out.println(colNames[i] +" not exported");
+                }
+            }
+            path = dialog.getFilePath();
+            //save protocol
+            if(!groundTruth && dialog.saveProtocol.getValue()) {
+                IJResultsTable ijrt = (IJResultsTable) table;
+                if(ijrt.getMeasurementProtocol() != null) {
+                    ijrt.getMeasurementProtocol().export(getProtocolFilePath(path));
+                }
+            }
+
+            //export
+            IImportExport exporter = getModuleByName(dialog.getFileFormat());
+            callExporter(exporter, table, path, columns);
+        }
     }
 
     private void setupModules() {
@@ -235,6 +287,26 @@ public class ImportExportPlugIn implements PlugIn {
             }
         }
         throw new RuntimeException("No module found for name " + name + ".");
+    }
+
+    abstract class IODialogHeadless  {
+
+        public ParameterTracker fileParams;
+        public ParameterTracker params;
+        public Window owner;
+        public String title;
+        public IODialogHeadless(ParameterTracker params, ParameterTracker fileParams, Window owner, String title) {
+            this.params = params;
+            this.fileParams = fileParams;
+            this.owner = owner;
+            this.title = title;
+        }
+
+
+
+        ParameterTracker getFileParams() {
+            return fileParams;
+        }
     }
 
     //---------------GUI-----------------------
@@ -394,6 +466,53 @@ public class ImportExportPlugIn implements PlugIn {
             setLocationRelativeTo(null);
             setModal(true);
         }
+
+        public String getFilePath() {
+            return filePath.getValue();
+        }
+
+        public String getFileFormat() {
+            return fileFormat.getValue();
+        }
+    }
+
+    class ExportDialogHeadless extends IODialogHeadless {
+
+        ParameterKey.String fileFormat;
+        ParameterKey.String filePath;
+        ParameterKey.Boolean[] exportColumns;
+        ParameterKey.Boolean saveProtocol;
+
+        private boolean groundTruth;
+        private String[] columnHeaders;
+
+        public ExportDialogHeadless(Window owner, boolean groundTruth, String[] columnHeaders) {
+            super(new ParameterTracker("thunderstorm.io"), new ParameterTracker("thunderstorm.io." + (groundTruth ? "gt" : "res")), owner, "Export" + (groundTruth ? " ground-truth" : ""));
+            assert moduleNames != null && moduleNames.length > 0;
+            this.columnHeaders = columnHeaders;
+            this.groundTruth = groundTruth;
+            fileFormat = fileParams.createStringField("fileFormat", StringValidatorFactory.isMember(moduleNames), moduleNames[0]);
+            filePath = fileParams.createStringField("filePath", null, "");
+            exportColumns = new ParameterKey.Boolean[columnHeaders.length];
+            for(int i = 0; i < columnHeaders.length; i++) {
+                exportColumns[i] = params.createBooleanField(columnHeaders[i], null, i != 0);
+            }
+            if(!groundTruth) {
+                saveProtocol = params.createBooleanField("saveProtocol", null, true);
+            }
+        }
+
+        ParameterTracker getParams() {
+            return params;
+        }
+
+
+        protected void layoutComponents() {
+
+        }
+
+
+
 
         public String getFilePath() {
             return filePath.getValue();
