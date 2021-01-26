@@ -290,10 +290,13 @@ public class ResultsDriftCorrection extends PostProcessingModule {
     public void runImpl() {
         try {
             //hide options balloons
-            ccOptionsBalloon.setVisible(false);
-            fiducialOptionsBalloon.setVisible(false);
+            if(!java.awt.GraphicsEnvironment.isHeadless()){
+                ccOptionsBalloon.setVisible(false);
+                fiducialOptionsBalloon.setVisible(false);
 
-            applyButton.setEnabled(false);
+                applyButton.setEnabled(false);
+            }
+
 
             saveStateForUndo();
 
@@ -304,7 +307,8 @@ public class ResultsDriftCorrection extends PostProcessingModule {
                 throw new RuntimeException("Could not find \"" + MoleculeDescriptor.LABEL_FRAME + "\" column.");
             }
         } catch(RuntimeException ex) {
-            applyButton.setEnabled(true);
+            if(applyButton != null)
+                applyButton.setEnabled(true);
             throw ex;
         }
         new WorkerThread<DriftResults>() {
@@ -369,7 +373,8 @@ public class ResultsDriftCorrection extends PostProcessingModule {
 
             @Override
             public void exFinally() {
-                applyButton.setEnabled(true);
+                if(applyButton != null)
+                    applyButton.setEnabled(true);
             }
         }.execute();
 

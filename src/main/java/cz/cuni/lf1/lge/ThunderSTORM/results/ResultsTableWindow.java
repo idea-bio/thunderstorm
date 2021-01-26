@@ -65,8 +65,17 @@ public class ResultsTableWindow extends GenericTableWindow {
 
     @Override
     protected void packFrame() {
-        if(isHeadless)
+        if(isHeadless){
+            postProcessingModules = ModuleLoader.getPostProcessingModules();
+            operationsStackPanel = new OperationsHistoryPanel();
+            for(PostProcessingModule module : postProcessingModules) {
+                module.setModel(model);
+                module.setTable(this);
+
+            }
             return;
+        }
+
 
         frame.setPreferredSize(new Dimension(600, 750));
         //
@@ -236,6 +245,8 @@ public class ResultsTableWindow extends GenericTableWindow {
     }
 
     public void setStatus(String text) {
+        if(isHeadless)
+            return;
         if(text == null) {
             text = " ";
         }

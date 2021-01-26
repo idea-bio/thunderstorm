@@ -17,9 +17,8 @@ import cz.cuni.lf1.lge.ThunderSTORM.util.MoleculeXYZComparator;
 import cz.cuni.lf1.lge.ThunderSTORM.util.WorkerThread;
 import cz.cuni.lf1.lge.ThunderSTORM.util.MacroUI.ParameterKey;
 import ij.IJ;
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -80,13 +79,15 @@ public class DuplicatesFilter extends PostProcessingModule {
     @Override
     protected void runImpl() {
         try {
-            if(!applyButton.isEnabled()) {
-                return;
+            if(!java.awt.GraphicsEnvironment.isHeadless()){
+                if(!applyButton.isEnabled()) {
+                    return;
+                }
+                distTextField.setBackground(Color.WHITE);
+                applyButton.setEnabled(false);
             }
-            distTextField.setBackground(Color.WHITE);
-            final String dist = distFormula.getValue();
-            applyButton.setEnabled(false);
 
+            final String dist = distFormula.getValue();
             DuplicatesFilter.this.saveStateForUndo();
             final int all = model.getRowCount();
             new WorkerThread<Void>() {
@@ -114,12 +115,16 @@ public class DuplicatesFilter extends PostProcessingModule {
 
                 @Override
                 public void exFinally() {
-                    applyButton.setEnabled(true);
+                    if(applyButton != null)
+                        applyButton.setEnabled(true);
                 }
             }.execute();
         } catch(Exception ex) {
-            distTextField.setBackground(new Color(255, 200, 200));
-            GUI.showBalloonTip(distTextField, ex.toString());
+            if(!java.awt.GraphicsEnvironment.isHeadless()){
+                distTextField.setBackground(new Color(255, 200, 200));
+                GUI.showBalloonTip(distTextField, ex.toString());
+            }
+
             IJ.handleException(ex);
         }
     }

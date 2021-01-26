@@ -91,7 +91,8 @@ public class LocalDensityFilter extends PostProcessingModule {
 
     @Override
     protected void runImpl() {
-        if(!applyButton.isEnabled()) {
+
+        if(!java.awt.GraphicsEnvironment.isHeadless() && !applyButton.isEnabled()) {
             return;
         }
         try {
@@ -103,7 +104,8 @@ public class LocalDensityFilter extends PostProcessingModule {
                 throw new Exception("Column `z` must be present in the table! Use 2D filter instead.");
             }
             //
-            applyButton.setEnabled(false);
+            if(!java.awt.GraphicsEnvironment.isHeadless())
+                applyButton.setEnabled(false);
             saveStateForUndo();
             final int nRows = model.getRowCount();
             new WorkerThread<Void>() {
@@ -154,13 +156,15 @@ public class LocalDensityFilter extends PostProcessingModule {
 
                 @Override
                 public void exFinally() {
-                    applyButton.setEnabled(true);
+                    if(applyButton != null)
+                        applyButton.setEnabled(true);
                 }
             }.execute();
         } catch (Exception ex) {
             IJ.error(ex.getMessage());
         } finally {
-            applyButton.setEnabled(true);
+            if(applyButton != null)
+                applyButton.setEnabled(true);
         }
     }
 

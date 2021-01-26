@@ -94,10 +94,18 @@ public class ResultsGrouping extends PostProcessingModule {
         final int offFrames = offFramesParam.getValue();
         final int framesPerMol = framesPerMolecule.getValue();
         final double zWeight = zCoordWeightParam.getValue();
-        if(!applyButton.isEnabled() || (dist == 0)) {
-            return;
+        if(!java.awt.GraphicsEnvironment.isHeadless()){
+            if(!applyButton.isEnabled() || (dist == 0)) {
+                return;
+            }
+            applyButton.setEnabled(false);
+        }else{
+            if(dist == 0) {
+                return;
+            }
+
         }
-        applyButton.setEnabled(false);
+
         saveStateForUndo();
 
         final int merged = model.getRowCount();
@@ -129,7 +137,8 @@ public class ResultsGrouping extends PostProcessingModule {
 
             @Override
             public void exFinally() {
-                applyButton.setEnabled(true);
+                if(applyButton != null)
+                    applyButton.setEnabled(true);
             }
         }.execute();
     }
@@ -143,7 +152,7 @@ public class ResultsGrouping extends PostProcessingModule {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+            if(e.getKeyCode() == KeyEvent.VK_ENTER && applyButton != null) {
                 applyButton.doClick();
             }
         }

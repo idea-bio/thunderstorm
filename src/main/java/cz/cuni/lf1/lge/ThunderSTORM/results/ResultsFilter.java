@@ -90,12 +90,21 @@ public class ResultsFilter extends PostProcessingModule {
     @Override
     protected void runImpl() {
         final String filterText = formulaParameter.getValue();
-        if((!applyButton.isEnabled()) || (filterText == null) || ("".equals(filterText))) {
-            return;
+        if(!java.awt.GraphicsEnvironment.isHeadless()) {
+            if((!applyButton.isEnabled()) || (filterText == null) || ("".equals(filterText))) {
+                return;
+            }
+            filterTextField.setBackground(Color.WHITE);
+        }else{
+            if((filterText == null) || ("".equals(filterText))) {
+                return;
+            }
         }
-        filterTextField.setBackground(Color.WHITE);
+
+
         try {
-            applyButton.setEnabled(false);
+            if(!java.awt.GraphicsEnvironment.isHeadless())
+                applyButton.setEnabled(false);
             saveStateForUndo();
             final int all = model.getRowCount();
             new WorkerThread<Void>() {
@@ -117,19 +126,26 @@ public class ResultsFilter extends PostProcessingModule {
 
                 @Override
                 public void exCatch(Throwable ex) {
-                    filterTextField.setBackground(new Color(255, 200, 200));
-                    GUI.showBalloonTip(filterTextField, ex.getCause().getMessage());
+                    if(!java.awt.GraphicsEnvironment.isHeadless()){
+                        filterTextField.setBackground(new Color(255, 200, 200));
+                        GUI.showBalloonTip(filterTextField, ex.getCause().getMessage());
+                    }
+
                 }
 
                 @Override
                 public void exFinally() {
-                    applyButton.setEnabled(true);
+                    if(applyButton != null)
+                        applyButton.setEnabled(true);
                 }
             }.execute();
         } catch(Exception ex) {
             IJ.handleException(ex);
-            filterTextField.setBackground(new Color(255, 200, 200));
-            GUI.showBalloonTip(filterTextField, ex.toString());
+            if(!java.awt.GraphicsEnvironment.isHeadless()){
+                filterTextField.setBackground(new Color(255, 200, 200));
+                GUI.showBalloonTip(filterTextField, ex.toString());
+            }
+
         }
     }
 

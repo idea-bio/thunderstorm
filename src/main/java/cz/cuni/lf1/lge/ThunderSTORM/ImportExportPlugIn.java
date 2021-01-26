@@ -90,40 +90,73 @@ public class ImportExportPlugIn implements PlugIn {
     }
 
     private void runImport(GenericTable table, boolean groundTruth) {
-        ImportDialog dialog = new ImportDialog(IJ.getInstance(), groundTruth);
-        if(MacroParser.isRanFromMacro()) {
-            dialog.getParams().readMacroOptions();
-            dialog.getFileParams().readMacroOptions();
-        } else {
-            Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
-            if(dialog.showAndGetResult() != JOptionPane.OK_OPTION && !isHeadless) {
-                return;
-            }
-        }
+        Boolean isHeadless = Boolean.parseBoolean(System.getProperty("java.awt.headless", "false"));
 
-        path = dialog.getFilePath();
-        boolean resetFirst = !dialog.append.getValue();
-        int startingFrame = dialog.startingFrame.getValue();
-        IImportExport importer = getModuleByName(dialog.getFileFormat());
-        table.forceHide();
-        if(resetFirst) table.reset();
-        if(groundTruth) {
-            callImporter(importer, table, path, startingFrame);
-        } else {    // IJResultsTable
-            IJResultsTable ijrt = (IJResultsTable) table;
-            try {
-                ijrt.setAnalyzedImage(WindowManager.getImage(dialog.rawImageStack.getValue()));
-            } catch(ArrayIndexOutOfBoundsException ex) {
-                if(resetFirst) {
-                    ijrt.setAnalyzedImage(null);
+        if(!isHeadless){
+            ImportDialog dialog = new ImportDialog(IJ.getInstance(), groundTruth);
+            if(MacroParser.isRanFromMacro()) {
+                dialog.getParams().readMacroOptions();
+                dialog.getFileParams().readMacroOptions();
+            } else {
+
+                if(dialog.showAndGetResult() != JOptionPane.OK_OPTION) {
+                    return;
                 }
             }
-            callImporter(importer, table, path, startingFrame);
-            AnalysisPlugIn.setDefaultColumnsWidth(ijrt);
-            ijrt.setLivePreview(dialog.showPreview.getValue());
-            ijrt.showPreview();
+
+            path = dialog.getFilePath();
+            boolean resetFirst = !dialog.append.getValue();
+            int startingFrame = dialog.startingFrame.getValue();
+            IImportExport importer = getModuleByName(dialog.getFileFormat());
+            table.forceHide();
+            if(resetFirst) table.reset();
+            if(groundTruth) {
+                callImporter(importer, table, path, startingFrame);
+            } else {    // IJResultsTable
+                IJResultsTable ijrt = (IJResultsTable) table;
+                try {
+                    ijrt.setAnalyzedImage(WindowManager.getImage(dialog.rawImageStack.getValue()));
+                } catch(ArrayIndexOutOfBoundsException ex) {
+                    if(resetFirst) {
+                        ijrt.setAnalyzedImage(null);
+                    }
+                }
+                callImporter(importer, table, path, startingFrame);
+                AnalysisPlugIn.setDefaultColumnsWidth(ijrt);
+                ijrt.setLivePreview(dialog.showPreview.getValue());
+                ijrt.showPreview();
+            }
+            table.forceShow();
+        }else{
+            ImportDialogHeadless dialog = new ImportDialogHeadless(IJ.getInstance(), groundTruth);
+            if(MacroParser.isRanFromMacro()) {
+                dialog.getParams().readMacroOptions();
+                dialog.getFileParams().readMacroOptions();
+            }
+            path = dialog.getFilePath();
+            boolean resetFirst = !dialog.append.getValue();
+            int startingFrame = dialog.startingFrame.getValue();
+            IImportExport importer = getModuleByName(dialog.getFileFormat());
+
+
+            if(groundTruth) {
+                callImporter(importer, table, path, startingFrame);
+            } else {    // IJResultsTable
+                IJResultsTable ijrt = (IJResultsTable) table;
+                try {
+                    ijrt.setAnalyzedImage(WindowManager.getImage(dialog.rawImageStack.getValue()));
+                } catch(ArrayIndexOutOfBoundsException ex) {
+                    if(resetFirst) {
+                        ijrt.setAnalyzedImage(null);
+                    }
+                }
+                callImporter(importer, table, path, startingFrame);
+                AnalysisPlugIn.setDefaultColumnsWidth(ijrt);
+
+            }
+
         }
-        table.forceShow();
+
     }
 
     private void runExport(GenericTable table, boolean groundTruth) {
@@ -465,6 +498,55 @@ public class ImportExportPlugIn implements PlugIn {
             pack();
             setLocationRelativeTo(null);
             setModal(true);
+        }
+
+        public String getFilePath() {
+            return filePath.getValue();
+        }
+
+        public String getFileFormat() {
+            return fileFormat.getValue();
+        }
+    }
+    class ImportDialogHeadless extends IODialogHeadless {
+
+        ParameterKey.String fileFormat;
+        ParameterKey.String filePath;
+        ParameterKey.Integer startingFrame;
+        ParameterKey.Boolean showPreview;
+        ParameterKey.Boolean append;
+        ParameterKey.String rawImageStack;
+
+        private boolean groundTruth;
+
+        public ImportDialogHeadless(Window owner, boolean groundTruth) {
+            super(new ParameterTracker("thunderstorm.io"), new ParameterTracker("thunderstorm.io." + (groundTruth ? "gt" : "res")), owner, "Import" + (groundTruth ? " ground-truth" : ""));
+            assert moduleNames != null && moduleNames.length > 0;
+            fileFormat = fileParams.createStringField("fileFormat", StringValidatorFactory.isMember(moduleNames), moduleNames[0]);
+            filePath = fileParams.createStringField("filePath", StringValidatorFactory.fileExists(), "");
+            startingFrame = params.createIntField("startingFrame", IntegerValidatorFactory.positiveNonZero(), 1);
+            append = params.createBooleanField("append", null, false);
+            this.groundTruth = groundTruth;
+            if(!groundTruth) {
+                showPreview = params.createBooleanField("livePreview", null, true);
+                rawImageStack = params.createStringField("rawImageStack", StringValidatorFactory.openImages(true), "");
+            }
+        }
+
+        ParameterTracker getParams() {
+            return params;
+        }
+
+
+        protected void layoutComponents() {
+
+
+            params.loadPrefs();
+            fileParams.loadPrefs();
+            if(path != null && !path.isEmpty()) {
+                filePath.setValue(path);
+            }
+
         }
 
         public String getFilePath() {
