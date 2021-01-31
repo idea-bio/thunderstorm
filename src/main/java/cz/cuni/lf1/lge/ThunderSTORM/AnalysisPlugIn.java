@@ -293,8 +293,7 @@ public final class AnalysisPlugIn implements ExtendedPlugInFilter {
         IJResultsTable rt = IJResultsTable.getResultsTable();
         rt.sortTableByFrame();
         rt.insertIdColumn();
-        if(!isHeadless)
-            rt.copyOriginalToActual();
+        rt.copyOriginalToActual();
         rt.setActualState();
         rt.convertAllColumnsToAnalogUnits();
         rt.setPreviewRenderer(renderingQueue);
