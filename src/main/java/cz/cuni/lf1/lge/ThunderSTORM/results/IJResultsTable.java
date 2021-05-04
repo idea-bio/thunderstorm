@@ -71,6 +71,14 @@ public class IJResultsTable extends GenericTable<ResultsTableWindow> {
         super(new ResultsTableWindow(IJResultsTable.TITLE));
     }
 
+    public static void Cleanup() {
+        resultsTable.analyzedImage = null;
+        resultsTable.measurementProtocol = null;
+        resultsTable = null;
+    }
+
+
+
     public void setMeasurementProtocol(MeasurementProtocol protocol) {
         measurementProtocol = protocol;
     }

@@ -32,6 +32,10 @@ public class IJGroundTruthTable extends GenericTable<GroundTruthTableWindow> {
         return gtTable;
     }
 
+    public static void Cleanup(){
+        gtTable = null;
+    }
+
     public static void setGroundTruthTable(IJGroundTruthTable gt) {
         gtTable = gt;
     }

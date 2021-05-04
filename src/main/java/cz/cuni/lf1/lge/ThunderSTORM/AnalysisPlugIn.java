@@ -311,4 +311,38 @@ public final class AnalysisPlugIn implements ExtendedPlugInFilter {
             renderingQueue.repaintLater();
         }
     }
+    /**
+     * This main function serves for development purposes.
+     * It allows you to run the plugin immediately out of
+     * your integrated development environment (IDE).
+     *
+     * @param args whatever, it's ignored
+     * @throws Exception
+     */
+    public static void main(final String... args) throws Exception {
+        // create the ImageJ application context with all available services
+        //System.setProperty("java.awt.headless", "true");
+        final ij.ImageJ ij1 = new ij.ImageJ(1);
+        CameraSetupPlugIn test1 = new  CameraSetupPlugIn();
+        String CameraSetupPlugInName = test1.getClass().getName();
+        AnalysisPlugIn analysis =  new AnalysisPlugIn();
+        String AnaName =  analysis.getClass().getName();
+        CleanPlugIn clean =  new CleanPlugIn();
+        String cleanName =  clean.getClass().getName();
+        //Object test332 = ij1.runUserPlugIn("Camera setup",CameraSetupPlugInName,"offset=180 isemgain=false photons2adu=5.4 gainem=160 pixelsize=97.8015899658203 clear=true",true);
+       Long mem =  IJ.currentMemory()/1048576;
+       //ImagePlus test33=  IJ.openImage("/Users/chizkiyahu/Desktop/test.tif");
+       IJ.runMacroFile( "/Users/chizkiyahu/Desktop/test.ijm");
+       Object test = ij1.runUserPlugIn("Run analysis",AnaName, "filter=[Wavelet filter (B-Spline)] scale=2 order=3 detector=[Local maximum] connectivity=8-neighbourhood threshold=2*std(Wave.F1)  estimator=[PSF: Integrated Gaussian] sigma=1.6 fitradius=3 method=[Weighted Least squares] full_image_fitting=false mfaenabled=false  renderer=[No Renderer]  ",true);
+
+       Long mem1 =  IJ.currentMemory()/1048576;
+        String mem2 = IJ.freeMemory();
+        Long mem3 =  IJ.currentMemory()/1048576;
+        Object test2eer = ij1.runUserPlugIn("clear",cleanName,"",true);
+        Long mem21 =  IJ.currentMemory()/1048576;
+        String mem22 = IJ.freeMemory();
+        Long mem23 =  IJ.currentMemory()/1048576;
+        System.out.println("finish");
+    }
+
 }
