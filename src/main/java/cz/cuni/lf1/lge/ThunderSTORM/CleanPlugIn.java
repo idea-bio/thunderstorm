@@ -12,7 +12,8 @@ public class CleanPlugIn implements PlugIn {
         IJGroundTruthTable.Cleanup();
         IJResultsTable.Cleanup();
         System.gc();
-
+        IJ.runMacro("run(\"Collect Garbage\")");
+        System.gc();
 
     }
 }
