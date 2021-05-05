@@ -128,6 +128,8 @@ public class ImportExportPlugIn implements PlugIn {
             }
             table.forceShow();
         }else{
+
+            table.show();
             ImportDialogHeadless dialog = new ImportDialogHeadless(IJ.getInstance(), groundTruth);
             if(MacroParser.isRanFromMacro()) {
                 dialog.getParams().readMacroOptions();

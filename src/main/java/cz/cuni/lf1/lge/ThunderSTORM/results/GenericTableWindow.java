@@ -63,6 +63,10 @@ public class GenericTableWindow {
             frame.setIconImage(IJ.getInstance().getIconImage());
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         }
+        else
+        {
+            isHeadlessVisible = false;
+        }
 
         //
         model = new TripleStateTableModel();
